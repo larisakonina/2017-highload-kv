@@ -12,23 +12,24 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 public class MyService implements KVService {
-    private static final String PREFIX ="id=";
+    private static final String PREFIX = "id=";
     @NotNull
     private final HttpServer server;
     @NotNull
-    private  MyDAO dao;
-    private static String extractId(@NotNull final String query){
+    private MyDAO dao;
+
+    private static String extractId(@NotNull final String query) {
 
 
         if (!query.startsWith(PREFIX)) {
-            throw new IllegalArgumentException("Shitty string");
+            throw new IllegalArgumentException("bad string");
 
         }
         return query.substring(PREFIX.length());
 
     }
 
-    public MyService (int port, @NotNull final MyDAO dao) throws IOException {
+    public MyService(int port, @NotNull final MyDAO dao) throws IOException {
 
         this.server = HttpServer.create(
                 new InetSocketAddress(port), 0);
@@ -44,13 +45,16 @@ public class MyService implements KVService {
 
         this.server.createContext("/v0/entity",
 
-                http-> {
+                http -> {
                     final String id = extractId((http.getRequestURI().getQuery()));
 
                     switch (http.getRequestMethod()) {
                         case "GET":
 
-                            if (id.isEmpty()) {http.sendResponseHeaders(400, 0); break;} else {
+                            if (id.isEmpty()) {
+                                http.sendResponseHeaders(400, 0);
+                                break;
+                            } else {
                                 try {
                                     final byte[] value = dao.get(id);
 
@@ -65,32 +69,33 @@ public class MyService implements KVService {
                             break;
 
 
-
-
                         case "DELETE":
 
                             dao.delete(id);
-                            if (id.isEmpty()) {http.sendResponseHeaders(400, 0); break;} else {
+                            if (id.isEmpty()) {
+                                http.sendResponseHeaders(400, 0);
+                                break;
+                            } else {
                                 http.sendResponseHeaders(202, 0);
 
                             }
                             break;
 
-
-
-
                         case "PUT":
 
                             final int contentLength = Integer.valueOf(http.getRequestHeaders().getFirst("Content-Length"));
                             final byte[] putValue = new byte[contentLength];
-                            if ( http.getRequestBody().read(putValue) != putValue.length ) {
-                                throw new IOException("Can't read!!");
-                            }
+                            final byte[] empty = new byte[0];
 
+                            http.getRequestBody().read(putValue);
+                            if (id.isEmpty()) {
+                                http.sendResponseHeaders(400, 0);
+                                break;
+                            } else
 
-                            if (id.isEmpty()) {http.sendResponseHeaders(400, 0); break;} else {
+                            {
+
                                 dao.upsert(id, putValue);
-
                                 http.sendResponseHeaders(201, 0);
 
                             }
@@ -108,19 +113,21 @@ public class MyService implements KVService {
     }
 
 
-
     @Override
-    public  void start() {
+    public void start() {
         this.server.start();
-    };
+    }
+
+    ;
 
     @Override
 
     public void stop() {
 
         this.server.stop(0);
-    };
+    }
 
+    ;
 
 
 }
