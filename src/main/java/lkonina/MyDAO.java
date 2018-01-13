@@ -1,4 +1,4 @@
-package my_package;
+package lkonina;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -15,5 +15,5 @@ public interface MyDAO {
 
     void upsert(@NotNull String key, byte[] value) throws IllegalArgumentException, IOException;
 
-    boolean check(@NotNull final String key )throws IllegalArgumentException, IOException;
+    boolean check(@NotNull final String key)throws IllegalArgumentException, IOException;
 }

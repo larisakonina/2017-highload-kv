@@ -1,5 +1,6 @@
-package my_package;
+package lkonina;
 
+import lkonina.MyDAO;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;

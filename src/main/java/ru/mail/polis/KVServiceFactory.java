@@ -1,7 +1,7 @@
 package ru.mail.polis;
 
-import my_package.MyFileDAO;
-import my_package.MyService;
+import lkonina.MyFileDAO;
+import lkonina.MyService;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
