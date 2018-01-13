@@ -19,10 +19,8 @@ public class MyService implements KVService {
 
     private static String extractId(@NotNull final String query) {
 
-
         if (!query.startsWith(PREFIX)) {
             throw new IllegalArgumentException("bad string");
-
         }
         return query.substring(PREFIX.length());
 
@@ -47,65 +45,38 @@ public class MyService implements KVService {
                 http -> {
                     final String id = extractId((http.getRequestURI().getQuery()));
 
-                    switch (http.getRequestMethod()) {
-                        case "GET":
+                    if (!id.isEmpty()) {
+                        switch (http.getRequestMethod()) {
 
-                            if (id.isEmpty()) {
-                                http.sendResponseHeaders(400, 0);
-                                break;
-                            } else {
+                            case "GET":
                                 try {
                                     final byte[] value = dao.get(id);
-
                                     http.sendResponseHeaders(200, value.length);
                                     http.getResponseBody().write(value);
-
                                 } catch (IOException e) {
                                     http.sendResponseHeaders(404, 0);
                                 }
-                            }
-
-                            break;
-
-
-                        case "DELETE":
-
-                            dao.delete(id);
-                            if (id.isEmpty()) {
-                                http.sendResponseHeaders(400, 0);
                                 break;
-                            } else {
+
+
+                            case "DELETE":
+                                dao.delete(id);
                                 http.sendResponseHeaders(202, 0);
-
-                            }
-                            break;
-
-                        case "PUT":
-
-                            final int contentLength = Integer.valueOf(http.getRequestHeaders().getFirst("Content-Length"));
-                            final byte[] putValue = new byte[contentLength];
-                            final byte[] empty = new byte[0];
-
-                            http.getRequestBody().read(putValue);
-                            if (id.isEmpty()) {
-                                http.sendResponseHeaders(400, 0);
                                 break;
-                            } else
 
-                            {
-
+                            case "PUT":
+                                final int contentLength = Integer.valueOf(http.getRequestHeaders().getFirst("Content-Length"));
+                                final byte[] putValue = new byte[contentLength];
+                                http.getRequestBody().read(putValue);
                                 dao.upsert(id, putValue);
                                 http.sendResponseHeaders(201, 0);
+                                break;
 
-                            }
-                            break;
+                            default:
+                                http.sendResponseHeaders(405, 0);
 
-
-                        default:
-                            http.sendResponseHeaders(405, 0);
-
-
-                    }
+                        }
+                    } else http.sendResponseHeaders(400, 0);
                     http.close();
 
                 });
@@ -114,19 +85,13 @@ public class MyService implements KVService {
 
     @Override
     public void start() {
+
         this.server.start();
     }
 
-    ;
-
     @Override
-
     public void stop() {
 
         this.server.stop(0);
     }
-
-    ;
-
-
 }
