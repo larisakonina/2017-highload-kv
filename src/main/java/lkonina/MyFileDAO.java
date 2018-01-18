@@ -4,17 +4,15 @@ import lkonina.MyDAO;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.io.File;
 import java.util.NoSuchElementException;
-//import java.nio.file.Files;
+import java.lang.String;
 
 public class MyFileDAO implements MyDAO {
-    public int check;
 
     public MyFileDAO(@NotNull final File dir) {
-
         this.dir = dir;
     }
-
 
     private final File dir;
 
@@ -22,20 +20,33 @@ public class MyFileDAO implements MyDAO {
         return new File(dir, key);
     }
 
-
     @NotNull
     @Override
-    public byte[] get(@NotNull final String key) throws NoSuchElementException, IllegalArgumentException, IOException {
+    public byte[] get(@NotNull String key) throws NoSuchElementException, IllegalArgumentException, IOException {
 
         final File file = getFile(key);
-        final byte[] value = new byte[(int) file.length()];
-        try (InputStream is = new FileInputStream(file)) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        InputStream is = new BufferedInputStream(new FileInputStream(file));
 
-            if (is.read(value) != value.length) {
-                throw new IOException("Can't read file");
+        try {
+            if (!file.exists()) {
+                throw new IOException("File doesn't exist");
+            }
+
+            int data;
+            while ((data = is.read()) != -1) {
+                os.write(data);
+            }
+        } finally {
+            if (null != is) {
+                is.close();
+            }
+            if (null != os) {
+                os.close();
             }
         }
-        return value;
+
+        return os.toByteArray();
     }
 
     @Override
@@ -49,13 +60,11 @@ public class MyFileDAO implements MyDAO {
 
     @Override
     public void delete(@NotNull String key) throws IllegalArgumentException, IOException {
-
         getFile(key).delete();
     }
 
     @Override
     public boolean check(@NotNull final String key) {
-
         return getFile(key).exists();
     }
 
