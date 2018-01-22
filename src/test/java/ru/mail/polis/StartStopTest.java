@@ -37,7 +37,6 @@ public class StartStopTest extends TestBase {
         endpoints = Collections.singleton(endpoint(port));
     }
 
-
     @AfterClass
     public static void afterAll() throws IOException {
         Files.recursiveDelete(data);

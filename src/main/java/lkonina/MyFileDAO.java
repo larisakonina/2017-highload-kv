@@ -26,26 +26,16 @@ public class MyFileDAO implements MyDAO {
 
         final File file = getFile(key);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        InputStream is = new BufferedInputStream(new FileInputStream(file));
 
-        try {
+        try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
             if (!file.exists()) {
                 throw new IOException("File doesn't exist");
             }
-
             int data;
             while ((data = is.read()) != -1) {
                 os.write(data);
             }
-        } finally {
-            if (null != is) {
-                is.close();
-            }
-            if (null != os) {
-                os.close();
-            }
         }
-
         return os.toByteArray();
     }
 
@@ -55,7 +45,6 @@ public class MyFileDAO implements MyDAO {
         try (OutputStream os = new FileOutputStream(getFile(key))) {
             os.write(value);
         }
-
     }
 
     @Override
@@ -67,5 +56,4 @@ public class MyFileDAO implements MyDAO {
     public boolean check(@NotNull final String key) {
         return getFile(key).exists();
     }
-
 }
